@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "mapperPizelScan": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
