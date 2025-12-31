@@ -14,9 +14,26 @@ namespace mapperPizelScan
             //Console.WriteLine("Provide location: ");
             //string location = Console.ReadLine();
 
-            var rect = Highlighter.Areas.GetValueOrDefault("Produce");
+            Image map = Image.Load("FinalMapPoc.png");
 
-            Highlighter.HighlightArea(rect);
+            List<string> aislesToHighlight = [];
+
+            foreach (var item in Highlighter.ShelfAreas.Keys)
+            {
+                aislesToHighlight.Add(item);
+            }
+            foreach (var item in Highlighter.FridgeAreas.Keys)
+            {
+                aislesToHighlight.Add(item);
+            }
+            foreach (var item in Highlighter.FrozenAreas.Keys)
+            {
+                aislesToHighlight.Add(item);
+            }
+
+            Highlighter.HighlightArea(map, ["16A", "02B", "17A", "19B", "13A", "11B", "Dairy", "Wine 6"]);
+
+            map.Save("output.png");
         }
     }
 }
