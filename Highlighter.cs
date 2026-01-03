@@ -13,12 +13,11 @@ namespace mapperPizelScan
 {
     public class Highlighter
     {
-        public static void HighlightArea(Image source, List<string> aisleNames)
+        public static void HighlightArea(Image source, string[] aisleNames)
         {
             foreach (var aisle in aisleNames)
             {
-                RectangleF area;
-                if (ShelfAreas.TryGetValue(aisle, out area))
+                if (ShelfAreas.TryGetValue(aisle, out RectangleF area))
                 {
                     source.Mutate(ctx => ctx.Fill(Color.FromRgba(255, 255, 0, 50), area));
                 }
