@@ -24,58 +24,57 @@ def start_pipe_server():
     print("Mapper connected!")
 
     try:
-        while True:
-            # Wait for item list from mapper
-            print("Waiting for item list...")
-            result, data = win32file.ReadFile(pipe, 65536)
-            message = data.decode("utf-8")
-            print(f"Received item list: {message}")
+        # Wait for item list from mapper
+        print("Waiting for item list...")
+        result, data = win32file.ReadFile(pipe, 65536)
+        message = data.decode("utf-8")
+        print(f"Received item list: {message}")
 
-            queryStore = message.split(",")
-            locations = set()
+        queryStore = message.split(",")
+        locations = set()
 
-            with SB(uc=True, headless=True, incognito=True, locale="en") as sb:
-                # Scrape -- BEGIN
-                sb.activate_cdp_mode("https://www.wegmans.com/", geoloc=(42.291318, -71.672678)) # Location in Wegmans lot
-                for item in queryStore:
-                    searchBar = sb.find_element('input[aria-labelledby="site-header-search-label"]')
-                    searchBar.send_keys(Keys.CONTROL + "a")
-                    searchBar.send_keys(Keys.BACKSPACE)
-                    sb.type('input[aria-labelledby="site-header-search-label"]', item + '\n')
-                    sb.sleep(1)
-                    try:
-                        sb.find_element('ul.product-grid > li', timeout=10)
-                        if sb.is_element_present('ul.product-grid > li'):
-                            locationDict = dict()
-                            results = sb.find_elements('ul.product-grid > li div.location')[0:5]  # Limit to first 5 results
-                            # Iterate through each result and store location counts
-                            for result in results:
-                                # Extract and normalize location text
-                                location = result.text
-                                if "3A-C" in location:
-                                    location = "03C"
-                                elif "-" in location:
-                                    location = location.split('-', maxsplit=2)[0]
-                                # Update occurrences in locationList
-                                if location in locationDict:
-                                    locationDict[location] += 1
-                                else:
-                                    locationDict[location] = 1
-                            sb.sleep(1)
+        with SB(uc=True, headless=True, incognito=True, locale="en") as sb:
+            # Scrape -- BEGIN
+            sb.activate_cdp_mode("https://www.wegmans.com/", geoloc=(42.291318, -71.672678)) # Location in Wegmans lot
+            for item in queryStore:
+                searchBar = sb.find_element('input[aria-labelledby="site-header-search-label"]')
+                searchBar.send_keys(Keys.CONTROL + "a")
+                searchBar.send_keys(Keys.BACKSPACE)
+                sb.type('input[aria-labelledby="site-header-search-label"]', item + '\n')
+                sb.sleep(1)
+                try:
+                    sb.find_element('ul.product-grid > li', timeout=10)
+                    if sb.is_element_present('ul.product-grid > li'):
+                        locationDict = dict()
+                        results = sb.find_elements('ul.product-grid > li div.location')[0:5]  # Limit to first 5 results
+                        # Iterate through each result and store location counts
+                        for result in results:
+                            # Extract and normalize location text
+                            location = result.text
+                            if "3A-C" in location:
+                                location = "03C"
+                            elif "-" in location:
+                                location = location.split('-', maxsplit=2)[0]
+                            # Update occurrences in locationList
+                            if location in locationDict:
+                                locationDict[location] += 1
+                            else:
+                                locationDict[location] = 1
+                        sb.sleep(1)
 
-                            # Find the most common location for item and add to locations set
-                            likelyLocation = max(locationDict, key=locationDict.get)
-                            print(f"{item} likely location: {likelyLocation}")
-                            locations.add(likelyLocation)
-                    except Exception as e:
-                        print(f"No results found for {item}: {e}")
-                # Scrape -- END
+                        # Find the most common location for item and add to locations set
+                        likelyLocation = max(locationDict, key=locationDict.get)
+                        print(f"{item} likely location: {likelyLocation}")
+                        locations.add(likelyLocation)
+                except Exception as e:
+                    print(f"No results found for {item}: {e}")
+            # Scrape -- END
 
-            # Send locations back to mapper
-            response = ",".join(locations) + "\n"
-            print(f"Sending locations: {response}")
-            win32file.WriteFile(pipe, response.encode("utf-8"))
-            print("Response sent!")
+        # Send locations back to mapper
+        response = ",".join(locations) + "\n"
+        print(f"Sending locations: {response}")
+        win32file.WriteFile(pipe, response.encode("utf-8"))
+        print("Response sent!")
     except pywintypes.error as e:
         print(f"Pipe error: {e}")
     finally:
