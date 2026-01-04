@@ -40,31 +40,35 @@ def start_pipe_server():
                 for item in queryStore:
                     searchBar = sb.find_element('input[aria-labelledby="site-header-search-label"]')
                     searchBar.send_keys(Keys.CONTROL + "a")
-                    searchBar.send_keys(Keys.DELETE)
-                    sb.sleep(1)
+                    searchBar.send_keys(Keys.BACKSPACE)
                     sb.type('input[aria-labelledby="site-header-search-label"]', item + '\n')
                     sb.sleep(1)
-                    if sb.is_element_present('ul.product-grid > li'):
-                        locationDict = dict()
-                        results = sb.find_elements('ul.product-grid > li div.location')[0:5]  # Limit to first 5 results
-                        # Iterate through each result and store location counts
-                        for result in results:
-                            # Extract and normalize location text
-                            location = result.text
-                            if "3A-C" in location:
-                                location = "03C"
-                            elif "-" in location:
-                                location = location.split('-', maxsplit=2)[0]
-                            # Update occurrences in locationList
-                            if location in locationDict:
-                                locationDict[location] += 1
-                            else:
-                                locationDict[location] = 1
+                    try:
+                        sb.find_element('ul.product-grid > li', timeout=10)
+                        if sb.is_element_present('ul.product-grid > li'):
+                            locationDict = dict()
+                            results = sb.find_elements('ul.product-grid > li div.location')[0:5]  # Limit to first 5 results
+                            # Iterate through each result and store location counts
+                            for result in results:
+                                # Extract and normalize location text
+                                location = result.text
+                                if "3A-C" in location:
+                                    location = "03C"
+                                elif "-" in location:
+                                    location = location.split('-', maxsplit=2)[0]
+                                # Update occurrences in locationList
+                                if location in locationDict:
+                                    locationDict[location] += 1
+                                else:
+                                    locationDict[location] = 1
+                            sb.sleep(1)
 
-                        # Find the most common location for item and add to locations set
-                        likelyLocation = max(locationDict, key=locationDict.get)
-                        if likelyLocation not in locations:
+                            # Find the most common location for item and add to locations set
+                            likelyLocation = max(locationDict, key=locationDict.get)
+                            print(f"{item} likely location: {likelyLocation}")
                             locations.add(likelyLocation)
+                    except Exception as e:
+                        print(f"No results found for {item}: {e}")
                 # Scrape -- END
 
             # Send locations back to mapper

@@ -50,7 +50,8 @@ namespace mapperPizelScan
 
             // Send item list to scraper and wait for aisle list
             Console.WriteLine($"Sending message: {itemList}");
-            writer.WriteLine(itemList);
+            writer.Write(itemList);
+            writer.Flush();
             Console.WriteLine("Message sent, waiting for aisle list...");
             
             string? response = reader.ReadLine();
