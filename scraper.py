@@ -46,7 +46,7 @@ def start_pipe_server():
                     sb.sleep(1)
                     if sb.is_element_present('ul.product-grid > li'):
                         locationDict = dict()
-                        results = sb.find_elements('ul.product-grid > li div.location')
+                        results = sb.find_elements('ul.product-grid > li div.location')[0:5]  # Limit to first 5 results
                         # Iterate through each result and store location counts
                         for result in results:
                             # Extract and normalize location text
