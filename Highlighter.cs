@@ -17,19 +17,24 @@ namespace mapperPizelScan
         {
             foreach (var aisle in aisleNames)
             {
+                Console.WriteLine($"Checking aisle {aisle}");
                 if (ShelfAreas.TryGetValue(aisle, out RectangleF area))
                 {
+                    Console.WriteLine($"Found aisle {aisle} in Shelf Areas");
                     source.Mutate(ctx => ctx.Fill(Color.FromRgba(255, 255, 0, 50), area));
                 }
                 else if (FridgeAreas.TryGetValue(aisle, out area))
                 {
+                    Console.WriteLine($"Found aisle {aisle} in Fridge Areas");
                     source.Mutate(ctx => ctx.Fill(Color.FromRgba(0, 255, 255, 50), area));
                 }
                 else if (FrozenAreas.TryGetValue(aisle, out area))
                 {
+                    Console.WriteLine($"Found aisle {aisle} in Frozen Areas");
                     source.Mutate(ctx => ctx.Fill(Color.FromRgba(0, 0, 255, 50), area));
                 }
             }
+            return;
         }
 
         public static Dictionary<string, RectangleF> ShelfAreas { get; } = new Dictionary<string, RectangleF>

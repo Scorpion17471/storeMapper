@@ -6,11 +6,11 @@ namespace mapperPizelScan
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static void Main()
         {
             // Connect using a socket to scraper
             Console.WriteLine("Connecting to scraper...");
-            using TcpClient client = new("scraper", 5858);
+            using TcpClient client = new("host.docker.internal", 5858);
             Console.WriteLine("Scraper connected!");
 
             using NetworkStream stream = client.GetStream();
@@ -53,7 +53,6 @@ namespace mapperPizelScan
                 data = stream.Read(buffer);
                 response += Encoding.UTF8.GetString(buffer, 0, data);
             }
-            response = response[0..^2];
 
             if (string.IsNullOrEmpty(response))
             {
@@ -64,12 +63,14 @@ namespace mapperPizelScan
             Console.WriteLine($"Received aisle list: {response}");
 
             // Highlight aisles on map
-            string[] aislesToHighlight = response.Split(',');
+            string[] aislesToHighlight = response.Trim().Split(',');
 
-            Image map = Image.Load("FinalMapPoc.png");
+            Console.WriteLine("Starting highlighting");
+            Image map = Image.Load("./imgData/FinalMapPoc.png");
             Highlighter.HighlightArea(map, aislesToHighlight);
-
-            map.Save("output.png");
+            Console.WriteLine("Highlighting done, saving image to imgData/output.png");
+            map.Save("./imgData/output.png");
+            Console.WriteLine("Image saved to imgData/output.png");
         }
     }
 }
