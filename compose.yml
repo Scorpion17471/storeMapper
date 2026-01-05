@@ -1,0 +1,23 @@
+services:
+    scraper:
+        image: scraper-image:latest
+        build:
+            context: .
+            dockerfile: Dockerfile.scraper
+        networks:
+            - scraper-mapper-network
+    mapper:
+        image: mapper-image:latest
+        stdin_open: true
+        depends_on:
+            scraper:
+                condition: service_started
+        build:
+            context: .
+            dockerfile: Dockerfile.mapper
+        networks:
+            - scraper-mapper-network
+
+networks:
+    scraper-mapper-network:
+        driver: bridge

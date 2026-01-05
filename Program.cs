@@ -1,12 +1,6 @@
 ﻿using SixLabors.ImageSharp;
-using System;
-using System.Collections.Generic;
-using System.IO.Pipes;
-using System.Linq;
-using System.Runtime.CompilerServices;
+using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace mapperPizelScan
 {
@@ -14,20 +8,12 @@ namespace mapperPizelScan
     {
         public static void Main(string[] args)
         {
-            // Connect using a named pipe to scraper
-            using var pipeClient = new NamedPipeClientStream(
-                ".",
-                "mapperPipe",
-                PipeDirection.InOut,
-                PipeOptions.Asynchronous
-            );
-
+            // Connect using a socket to scraper
             Console.WriteLine("Connecting to scraper...");
-            pipeClient.Connect();
+            using TcpClient client = new("scraper", 5858);
             Console.WriteLine("Scraper connected!");
 
-            using var reader = new StreamReader(pipeClient);
-            using var writer = new StreamWriter(pipeClient) { AutoFlush = true };
+            using NetworkStream stream = client.GetStream();
 
             // Get item list from user
             StringBuilder itemListBuilder = new();
@@ -45,16 +31,29 @@ namespace mapperPizelScan
                 input = Console.ReadLine();
             }
 
+            if (itemListBuilder.Length == 0)
+            {
+                Console.WriteLine("No items entered. Exiting.");
+                return;
+            }
             itemListBuilder.Length--; // Remove last comma
             string itemList = itemListBuilder.ToString();
 
             // Send item list to scraper and wait for aisle list
             Console.WriteLine($"Sending message: {itemList}");
-            writer.Write(itemList);
-            writer.Flush();
+            stream.Write(Encoding.UTF8.GetBytes(itemList + "\r\n"));
             Console.WriteLine("Message sent, waiting for aisle list...");
             
-            string? response = reader.ReadLine();
+            var buffer = new byte[1024];
+            var data = stream.Read(buffer);
+            string? response = Encoding.UTF8.GetString(buffer, 0, data);
+            
+            while(response.EndsWith("\r\n") == false)
+            {
+                data = stream.Read(buffer);
+                response += Encoding.UTF8.GetString(buffer, 0, data);
+            }
+            response = response[0..^2];
 
             if (string.IsNullOrEmpty(response))
             {
