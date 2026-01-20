@@ -1,19 +1,30 @@
-﻿using SixLabors.ImageSharp;
+﻿using Azure.Core;
+using Azure.Identity;
+using Azure.Messaging.ServiceBus;
+using Microsoft.Identity.Client;
+using SixLabors.ImageSharp;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace mapperPizelScan
 {
     public class Program
     {
-        public static void Main()
+        public static async Task Main()
         {
-            // Connect using a socket to scraper
-            Console.WriteLine("Connecting to scraper...");
-            using TcpClient client = new("host.docker.internal", 5858);
-            Console.WriteLine("Scraper connected!");
+            // Instance servicebus client + sender/receiver
+            var client = new ServiceBusClient(
+                "mapperEvents.servicebus.windows.net",
+                new DefaultAzureCredential(),
+                new ServiceBusClientOptions
+                {
+                    TransportType = ServiceBusTransportType.AmqpWebSockets
+                }
+            );
 
-            using NetworkStream stream = client.GetStream();
+            var sender = client.CreateSender("items");
+            var receiver = client.CreateReceiver("aisles");
 
             // Get item list from user
             StringBuilder itemListBuilder = new();
@@ -41,18 +52,12 @@ namespace mapperPizelScan
 
             // Send item list to scraper and wait for aisle list
             Console.WriteLine($"Sending message: {itemList}");
-            stream.Write(Encoding.UTF8.GetBytes(itemList + "\r\n"));
+            await sender.SendMessageAsync(new ServiceBusMessage(itemList));
             Console.WriteLine("Message sent, waiting for aisle list...");
             
             var buffer = new byte[1024];
-            var data = stream.Read(buffer);
-            string? response = Encoding.UTF8.GetString(buffer, 0, data);
-            
-            while(response.EndsWith("\r\n") == false)
-            {
-                data = stream.Read(buffer);
-                response += Encoding.UTF8.GetString(buffer, 0, data);
-            }
+            var data = await receiver.ReceiveMessageAsync();
+            string response = data.ToString();
 
             if (string.IsNullOrEmpty(response))
             {

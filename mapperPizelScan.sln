@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36705.20 d17.14
+VisualStudioVersion = 17.14.36705.20
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mapperPizelScan", "mapperPizelScan.csproj", "{8FA10BEC-A61D-447D-9209-F017D580BE20}"
+EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "scraper", "..\scraper\scraper.pyproj", "{AA65FDC0-D4F9-4668-AECD-1530609CD7DC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,8 @@ Global
 		{8FA10BEC-A61D-447D-9209-F017D580BE20}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8FA10BEC-A61D-447D-9209-F017D580BE20}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8FA10BEC-A61D-447D-9209-F017D580BE20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA65FDC0-D4F9-4668-AECD-1530609CD7DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA65FDC0-D4F9-4668-AECD-1530609CD7DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
