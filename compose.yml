@@ -5,7 +5,5 @@ services:
         build:
             context: .
             dockerfile: Dockerfile
-        extra_hosts:
-          - "host.docker.internal:host-gateway"
         volumes:
             - ./imgData:/App/imgData:rw

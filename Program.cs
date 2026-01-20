@@ -57,7 +57,7 @@ namespace mapperPizelScan
             
             var buffer = new byte[1024];
             var data = await receiver.ReceiveMessageAsync();
-            string response = data.ToString();
+            string response = data.Body.ToString();
 
             if (string.IsNullOrEmpty(response))
             {
